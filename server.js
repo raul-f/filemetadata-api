@@ -1,23 +1,35 @@
 'use strict';
 
-var express = require('express');
-var cors = require('cors');
+const express = require('express');
+const cors = require('cors');
+const multer = require('multer');
+const upload = multer();
 
 // require and use "multer"...
 
-var app = express();
+const app = express();
 
 app.use(cors());
 app.use('/public', express.static(process.cwd() + '/public'));
 
-app.get('/', function (req, res) {
-     res.sendFile(process.cwd() + '/views/index.html');
-  });
-
-app.get('/hello', function(req, res){
-  res.json({greetings: "Hello, API"});
+app.use((req, res, next) => {
+	console.log(`\n${req.method} request to ${req.url} has been received!`);
+	next();
 });
 
-app.listen(process.env.PORT || 3000, function () {
-  console.log('Node.js listening ...');
+app.post('/api/fileanalyse', upload.single('upfile'), (req, res) => {
+	// console.log(req.file);
+	res.json({name: req.file.originalname, type: req.file.mimetype, size: req.file.size});
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(process.cwd() + '/views/index.html');
+});
+
+app.get('/hello', (req, res) => {
+  	res.json({greetings: "Hello, API"});
+});
+
+const listener = app.listen(process.env.PORT || 3000, () => {
+	console.log('Your app is listening on port ' + listener.address().port)
 });
